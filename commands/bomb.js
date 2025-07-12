@@ -2,7 +2,7 @@ const axios = require('axios').default;
 const { CookieJar } = require('tough-cookie');
 const { wrapper } = require('axios-cookiejar-support');
 const cheerio = require('cheerio');
-const FormData = require('form-data');
+const { URLSearchParams } = require('url');
 
 // 🔐 Login credentials
 const email = 'maxjihad59@gmail.com';
@@ -24,9 +24,14 @@ async function login() {
 
     if (!token) throw new Error('CSRF token not found');
 
+    const loginForm = new URLSearchParams();
+    loginForm.append('email', email);
+    loginForm.append('password', password);
+    loginForm.append('_token', token);
+
     const loginRes = await client.post(
       'https://www.pikachutools.my.id/user/login',
-      `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&_token=${encodeURIComponent(token)}`,
+      loginForm.toString(),
       {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -36,10 +41,7 @@ async function login() {
       }
     );
 
-    console.log('Login Response:', loginRes.data); // Debugging line
-
-    // Check for successful login
-    return loginRes.status === 200 || loginRes.data.includes('user');
+    return loginRes.status === 200 && !loginRes.data.includes('These credentials do not match');
   } catch (e) {
     console.error('❌ Login Error:', e.message);
     return false;
@@ -55,22 +57,24 @@ async function sendBomb(phone, amount) {
 
     if (!token) throw new Error('CSRF token not found on user page');
 
-    const form = new FormData();
+    const form = new URLSearchParams();
     form.append('_token', token);
     form.append('nomor', phone);
     form.append('jumlah', amount);
 
-    const res = await client.post('https://www.pikachutools.my.id/user', form, {
-      headers: {
-        ...form.getHeaders(),
-        'Origin': 'https://www.pikachutools.my.id',
-        'Referer': 'https://www.pikachutools.my.id/user'
+    const res = await client.post(
+      'https://www.pikachutools.my.id/user',
+      form.toString(),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Origin': 'https://www.pikachutools.my.id',
+          'Referer': 'https://www.pikachutools.my.id/user'
+        }
       }
-    });
+    );
 
-    console.log('Bomb Response:', res.data); // Debugging line
-
-    if (res.data?.status === true) {
+    if (res.data?.includes('Berhasil') || res.data?.status === true) {
       return `✅ Bomb sent to ${phone} (${amount}x)`;
     }
 
