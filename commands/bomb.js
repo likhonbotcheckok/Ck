@@ -1,12 +1,12 @@
+require('dotenv').config();
 const axios = require('axios').default;
 const { CookieJar } = require('tough-cookie');
 const { wrapper } = require('axios-cookiejar-support');
 const cheerio = require('cheerio');
 const FormData = require('form-data');
 
-// 🔐 Login credentials
-const email = 'maxjihad59@gmail.com';
-const password = 'Likhon@#12';
+const email = process.env.EMAIL;
+const password = process.env.PASSWORD;
 
 const jar = new CookieJar();
 const client = wrapper(axios.create({
@@ -15,7 +15,6 @@ const client = wrapper(axios.create({
   maxRedirects: 5
 }));
 
-// ✅ Login function
 async function login() {
   try {
     const loginPage = await client.get('https://www.pikachutools.my.id/user/login');
@@ -36,24 +35,24 @@ async function login() {
       }
     );
 
-    return loginRes.status === 200 && !loginRes.data.includes('Login');
+    if (loginRes.status === 200 && loginRes.data.includes('user')) {
+      return true;
+    }
+
+    return false;
   } catch (e) {
     console.error('❌ Login Error:', e.message);
     return false;
   }
 }
 
-// ✅ Send bomb function
 async function sendBomb(phone, amount) {
   try {
     const userPage = await client.get('https://www.pikachutools.my.id/user');
     const $ = cheerio.load(userPage.data);
     const token = $('input[name="_token"]').val();
 
-    if (!token) {
-      console.log(userPage.data); // Debug HTML
-      throw new Error('CSRF token not found on user page');
-    }
+    if (!token) throw new Error('CSRF token not found on user page');
 
     const form = new FormData();
     form.append('_token', token);
@@ -68,18 +67,16 @@ async function sendBomb(phone, amount) {
       }
     });
 
-    if (res.data?.status === true || res.data?.includes("Terkirim")) {
+    if (res.data?.status === true || res.data?.includes('terkirim')) {
       return `✅ Bomb sent to ${phone} (${amount}x)`;
     }
 
     return `❌ Bomb failed: ${JSON.stringify(res.data)}`;
   } catch (e) {
-    console.error('❌ Bomb error:', e.message);
     return `❌ Error: ${e.message}`;
   }
 }
 
-// ✅ Telegram bot command handler
 module.exports = (bot) => {
   bot.on('message', async (msg) => {
     const text = msg.text?.trim();
@@ -108,7 +105,7 @@ module.exports = (bot) => {
       const ok = await login();
 
       if (!ok) {
-        return bot.sendMessage(chatId, '❌ লগইন ব্যর্থ! ইমেইল/পাসওয়ার্ড ভুল অথবা সাইটে প্রবেশ করা যাচ্ছে না।');
+        return bot.sendMessage(chatId, '❌ লগইন ব্যর্থ! মেইল/পাসওয়ার্ড ভুল বা সাইট ডাউন।');
       }
 
       await bot.sendMessage(chatId, `🚀 বোম্ব শুরু: ${phone} (${amount})`);
@@ -116,7 +113,6 @@ module.exports = (bot) => {
 
       return bot.sendMessage(chatId, result);
     } catch (err) {
-      console.error('❌ Command error:', err.message);
       return bot.sendMessage(chatId, `❌ ত্রুটি: ${err.message}`);
     }
   });
