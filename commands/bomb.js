@@ -1,4 +1,3 @@
-require('dotenv').config();
 const axios = require('axios').default;
 const { CookieJar } = require('tough-cookie');
 const { wrapper } = require('axios-cookiejar-support');
@@ -21,27 +20,24 @@ async function login() {
     const $ = cheerio.load(loginPage.data);
     const token = $('input[name="_token"]').val();
 
-    if (!token) throw new Error('CSRF token not found');
+    if (!token) throw new Error('❌ CSRF token না পাওয়া গেছে login পেইজে');
 
-    const loginRes = await client.post(
+    const res = await client.post(
       'https://www.pikachutools.my.id/user/login',
       `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&_token=${encodeURIComponent(token)}`,
       {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Origin': 'https://www.pikachutools.my.id',
-          'Referer': 'https://www.pikachutools.my.id/user/login'
+          'Referer': 'https://www.pikachutools.my.id/user/login',
+          'Origin': 'https://www.pikachutools.my.id'
         }
       }
     );
 
-    if (loginRes.status === 200 && loginRes.data.includes('user')) {
-      return true;
-    }
-
-    return false;
+    console.log('🔐 Login response status:', res.status);
+    return res.status === 200 && res.data.includes('user');
   } catch (e) {
-    console.error('❌ Login Error:', e.message);
+    console.error('❌ Login error:', e.message);
     return false;
   }
 }
@@ -52,7 +48,7 @@ async function sendBomb(phone, amount) {
     const $ = cheerio.load(userPage.data);
     const token = $('input[name="_token"]').val();
 
-    if (!token) throw new Error('CSRF token not found on user page');
+    if (!token) throw new Error('❌ CSRF token না পাওয়া গেছে user পেইজে');
 
     const form = new FormData();
     form.append('_token', token);
@@ -62,17 +58,20 @@ async function sendBomb(phone, amount) {
     const res = await client.post('https://www.pikachutools.my.id/user', form, {
       headers: {
         ...form.getHeaders(),
-        'Origin': 'https://www.pikachutools.my.id',
-        'Referer': 'https://www.pikachutools.my.id/user'
+        'Referer': 'https://www.pikachutools.my.id/user',
+        'Origin': 'https://www.pikachutools.my.id'
       }
     });
 
-    if (res.data?.status === true || res.data?.includes('terkirim')) {
+    console.log('📨 Bomb response:', res.data);
+
+    if (res.data?.status === true) {
       return `✅ Bomb sent to ${phone} (${amount}x)`;
     }
 
     return `❌ Bomb failed: ${JSON.stringify(res.data)}`;
   } catch (e) {
+    console.error('❌ Bomb Error:', e.message);
     return `❌ Error: ${e.message}`;
   }
 }
@@ -100,20 +99,16 @@ module.exports = (bot) => {
       return bot.sendMessage(chatId, '❌ এমাউন্ট ভুল! ১ থেকে ১০০০ পর্যন্ত দিন।');
     }
 
-    try {
-      await bot.sendMessage(chatId, '🔐 লগইন হচ্ছে...');
-      const ok = await login();
+    await bot.sendMessage(chatId, '🔐 লগইন হচ্ছে...');
+    const success = await login();
 
-      if (!ok) {
-        return bot.sendMessage(chatId, '❌ লগইন ব্যর্থ! মেইল/পাসওয়ার্ড ভুল বা সাইট ডাউন।');
-      }
-
-      await bot.sendMessage(chatId, `🚀 বোম্ব শুরু: ${phone} (${amount})`);
-      const result = await sendBomb(phone, amount);
-
-      return bot.sendMessage(chatId, result);
-    } catch (err) {
-      return bot.sendMessage(chatId, `❌ ত্রুটি: ${err.message}`);
+    if (!success) {
+      return bot.sendMessage(chatId, '❌ লগইন ব্যর্থ! .env ফাইল চেক করুন।');
     }
+
+    await bot.sendMessage(chatId, `🚀 বোম্ব শুরু: ${phone} (${amount})`);
+    const result = await sendBomb(phone, amount);
+
+    return bot.sendMessage(chatId, result);
   });
 };
