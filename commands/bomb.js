@@ -36,7 +36,10 @@ async function login() {
       }
     );
 
-    return loginRes.status === 200 || loginRes.request.path.includes('/user');
+    console.log('Login Response:', loginRes.data); // Debugging line
+
+    // Check for successful login
+    return loginRes.status === 200 || loginRes.data.includes('user');
   } catch (e) {
     console.error('❌ Login Error:', e.message);
     return false;
@@ -64,6 +67,8 @@ async function sendBomb(phone, amount) {
         'Referer': 'https://www.pikachutools.my.id/user'
       }
     });
+
+    console.log('Bomb Response:', res.data); // Debugging line
 
     if (res.data?.status === true) {
       return `✅ Bomb sent to ${phone} (${amount}x)`;
