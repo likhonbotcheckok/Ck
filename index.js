@@ -9,7 +9,11 @@ const { loadDB, saveDB } = require('./utils/db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Global variables initialization
+// Optional middleware (future proofing)
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Global variables
 global.botStartTime = Date.now();
 global.activeEmails = {};
 global.userDB = { approved: [], pending: [], banned: [] };
@@ -32,14 +36,13 @@ async function initializeDatabase() {
 
 function loadCommands(bot) {
   const commandsPath = path.join(__dirname, 'commands');
-  
+
   if (!fs.existsSync(commandsPath)) {
     console.error('❌ Commands directory not found');
     return;
   }
 
-  const commandFiles = fs.readdirSync(commandsPath)
-    .filter(file => file.endsWith('.js'));
+  const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
   if (commandFiles.length === 0) {
     console.warn('⚠️ No command files found');
@@ -67,32 +70,27 @@ function loadCommands(bot) {
 
 async function startBot() {
   try {
-    // Verify essential environment variables
     if (!process.env.BOT_TOKEN) {
       throw new Error('Missing BOT_TOKEN in environment variables');
     }
 
-    // Initialize database
     await initializeDatabase();
 
-    // Create bot instance
+    // ✅ Polling always true as you requested
     const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
     console.log('🤖 Bot instance created');
 
-    // Error handling
     bot.on('polling_error', (error) => {
       console.error('🔴 Polling error:', error.message);
     });
 
-    // Load commands
     loadCommands(bot);
 
-    // Set up Express routes
     app.get('/', (req, res) => {
       res.json({
         status: 'running',
         uptime: Date.now() - global.botStartTime,
-        commands: Object.keys(bot._textRegexCallbacks).length
+        commands: bot._textRegexCallbacks ? Object.keys(bot._textRegexCallbacks).length : 0
       });
     });
 
@@ -103,7 +101,6 @@ async function startBot() {
       });
     });
 
-    // Start Express server
     app.listen(PORT, () => {
       console.log(`🌐 Server running on port ${PORT}`);
       console.log(`✅ Bot is fully operational (Started at ${new Date(global.botStartTime)})`);
