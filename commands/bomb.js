@@ -2,7 +2,7 @@ const axios = require('axios').default;
 const { CookieJar } = require('tough-cookie');
 const { wrapper } = require('axios-cookiejar-support');
 const cheerio = require('cheerio');
-const { URLSearchParams } = require('url');
+const FormData = require('form-data');
 
 // 🔐 Login credentials
 const email = 'maxjihad59@gmail.com';
@@ -24,14 +24,9 @@ async function login() {
 
     if (!token) throw new Error('CSRF token not found');
 
-    const loginForm = new URLSearchParams();
-    loginForm.append('email', email);
-    loginForm.append('password', password);
-    loginForm.append('_token', token);
-
     const loginRes = await client.post(
       'https://www.pikachutools.my.id/user/login',
-      loginForm.toString(),
+      `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&_token=${encodeURIComponent(token)}`,
       {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -41,7 +36,7 @@ async function login() {
       }
     );
 
-    return loginRes.status === 200 && !loginRes.data.includes('These credentials do not match');
+    return loginRes.status === 200 && !loginRes.data.includes('Login');
   } catch (e) {
     console.error('❌ Login Error:', e.message);
     return false;
@@ -55,26 +50,25 @@ async function sendBomb(phone, amount) {
     const $ = cheerio.load(userPage.data);
     const token = $('input[name="_token"]').val();
 
-    if (!token) throw new Error('CSRF token not found on user page');
+    if (!token) {
+      console.log(userPage.data); // Debug HTML
+      throw new Error('CSRF token not found on user page');
+    }
 
-    const form = new URLSearchParams();
+    const form = new FormData();
     form.append('_token', token);
     form.append('nomor', phone);
     form.append('jumlah', amount);
 
-    const res = await client.post(
-      'https://www.pikachutools.my.id/user',
-      form.toString(),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Origin': 'https://www.pikachutools.my.id',
-          'Referer': 'https://www.pikachutools.my.id/user'
-        }
+    const res = await client.post('https://www.pikachutools.my.id/user', form, {
+      headers: {
+        ...form.getHeaders(),
+        'Origin': 'https://www.pikachutools.my.id',
+        'Referer': 'https://www.pikachutools.my.id/user'
       }
-    );
+    });
 
-    if (res.data?.includes('Berhasil') || res.data?.status === true) {
+    if (res.data?.status === true || res.data?.includes("Terkirim")) {
       return `✅ Bomb sent to ${phone} (${amount}x)`;
     }
 
@@ -114,7 +108,7 @@ module.exports = (bot) => {
       const ok = await login();
 
       if (!ok) {
-        return bot.sendMessage(chatId, '❌ লগইন ব্যর্থ! ইমেইল/পাসওয়ার্ড ভুল।');
+        return bot.sendMessage(chatId, '❌ লগইন ব্যর্থ! ইমেইল/পাসওয়ার্ড ভুল অথবা সাইটে প্রবেশ করা যাচ্ছে না।');
       }
 
       await bot.sendMessage(chatId, `🚀 বোম্ব শুরু: ${phone} (${amount})`);
