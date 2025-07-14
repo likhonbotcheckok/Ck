@@ -8,8 +8,7 @@ module.exports = (bot) => {
     await handleStart(bot, msg.chat.id, msg.from);
   });
 
-  // ❌ Commented callback_query to avoid double handler
-  /*
+  // Button click handler
   bot.on('callback_query', async (query) => {
     const data = query.data;
     const chatId = query.message.chat.id;
@@ -59,7 +58,6 @@ module.exports = (bot) => {
       await handleStart(bot, chatId, from, query.id, messageId);
     }
   });
-  */
 };
 
 async function handleStart(bot, chatId, from, callbackId = null, messageId = null) {
