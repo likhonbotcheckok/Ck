@@ -9,7 +9,7 @@ module.exports = (bot) => {
     const username = query.from.username || "NoUsername";
     const userId = query.from.id;
 
-    const db = await loadDB(); // ✅ async fix
+    const db = await loadDB();
 
     const isAdmin = (
       (username?.toLowerCase() === ADMIN_USERNAME?.toLowerCase()) ||
@@ -41,25 +41,6 @@ module.exports = (bot) => {
           return bot.editMessageText(`🔐 Use .2fa <secret_key>\n\nExample:\n.2fa JBSWY3DPEHPK3PXP`, {
             chat_id: chatId,
             message_id: messageId,
-            reply_markup: {
-              inline_keyboard: [[{ text: '⬅️ Back', callback_data: 'back' }]]
-            }
-          });
-
-        case 'uptime':
-          const uptimeMs = Date.now() - global.botStartTime;
-          const totalSeconds = Math.floor(uptimeMs / 1000);
-          const days = Math.floor(totalSeconds / (3600 * 24));
-          const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
-          const minutes = Math.floor((totalSeconds % 3600) / 60);
-          const seconds = totalSeconds % 60;
-
-          const uptimeStr = `⏱️ *Bot Uptime:*\n\`${days}d ${hours}h ${minutes}m ${seconds}s\``;
-
-          return bot.editMessageText(uptimeStr, {
-            chat_id: chatId,
-            message_id: messageId,
-            parse_mode: "Markdown",
             reply_markup: {
               inline_keyboard: [[{ text: '⬅️ Back', callback_data: 'back' }]]
             }
