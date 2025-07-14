@@ -1,5 +1,6 @@
 const { loadDB } = require('../utils/db');
 const { ADMIN_UID, ADMIN_USERNAME } = require('../config/botConfig');
+const { setUserMode, clearUserMode } = require('../utils/userMode'); // 🆕 Mode utils import
 
 module.exports = (bot) => {
   bot.on('callback_query', async (query) => {
@@ -20,27 +21,33 @@ module.exports = (bot) => {
     try {
       switch (data) {
         case 'gen':
-          return bot.editMessageText(`💳 Use /gen <bin> to generate credit cards.\n\nExample:\n/gen 515462`, {
+          await setUserMode(userId, 'gen'); // 🆕 Set mode
+          return bot.editMessageText(`💳 You are now in *Gen Mode*\n\nUse /gen <bin>\nExample:\n/gen 515462`, {
             chat_id: chatId,
             message_id: messageId,
+            parse_mode: 'Markdown',
             reply_markup: {
               inline_keyboard: [[{ text: '⬅️ Back', callback_data: 'back' }]]
             }
           });
 
         case 'tempmail':
-          return bot.editMessageText(`📩 Use .tempmail <username>\n\nExample:\n.tempmail rihad123`, {
+          await setUserMode(userId, 'tempmail'); // 🆕 Set mode
+          return bot.editMessageText(`📩 You are now in *TempMail Mode*\n\nUse .tempmail <username>\nExample:\n.tempmail rihad123`, {
             chat_id: chatId,
             message_id: messageId,
+            parse_mode: 'Markdown',
             reply_markup: {
               inline_keyboard: [[{ text: '⬅️ Back', callback_data: 'back' }]]
             }
           });
 
         case '2fa':
-          return bot.editMessageText(`🔐 Use .2fa <secret_key>\n\nExample:\n.2fa JBSWY3DPEHPK3PXP`, {
+          await setUserMode(userId, '2fa'); // 🆕 Set mode
+          return bot.editMessageText(`🔐 You are now in *2FA Mode*\n\nUse .2fa <secret_key>\nExample:\n.2fa JBSWY3DPEHPK3PXP`, {
             chat_id: chatId,
             message_id: messageId,
+            parse_mode: 'Markdown',
             reply_markup: {
               inline_keyboard: [[{ text: '⬅️ Back', callback_data: 'back' }]]
             }
@@ -97,6 +104,7 @@ module.exports = (bot) => {
           });
 
         case 'back':
+          await clearUserMode(userId); // 🆕 Clear mode
           if (isAdmin) {
             return bot.editMessageText(`👑 Welcome Admin @${username}!`, {
               chat_id: chatId,
