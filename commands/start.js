@@ -3,60 +3,9 @@ const { loadDB, saveDB } = require('../utils/db');
 const notifyAdmin = require('../utils/notifyAdmin');
 
 module.exports = (bot) => {
-  // /start command
+  // /start command only
   bot.onText(/\/start/, async (msg) => {
     await handleStart(bot, msg.chat.id, msg.from);
-  });
-
-  // Button click handler
-  bot.on('callback_query', async (query) => {
-    const data = query.data;
-    const chatId = query.message.chat.id;
-    const from = query.from;
-    const messageId = query.message.message_id;
-
-    if (data === 'menu') {
-      const uid = from.id;
-      const username = from.username || 'NoUsername';
-      const isAdmin = uid === Number(ADMIN_UID);
-
-      const buttons = isAdmin
-        ? [
-            [{ text: "📄 Users", callback_data: "users" }],
-            [
-              { text: "💳 Gen", callback_data: "gen" },
-              { text: "📩 TempMail", callback_data: "tempmail" }
-            ],
-            [
-              { text: "🔐 2FA", callback_data: "2fa" },
-              { text: "🕒 Uptime", callback_data: "uptime" }
-            ],
-            [{ text: "🔙 Back", callback_data: "back_to_home" }]
-          ]
-        : [
-            [
-              { text: "💳 Gen", callback_data: "gen" },
-              { text: "📩 TempMail", callback_data: "tempmail" }
-            ],
-            [
-              { text: "🔐 2FA", callback_data: "2fa" },
-              { text: "🕒 Uptime", callback_data: "uptime" }
-            ],
-            [{ text: "🔙 Back", callback_data: "back_to_home" }]
-          ];
-
-      await bot.answerCallbackQuery(query.id);
-      return bot.editMessageText("📋 *Command Menu*\nSelect an option below:", {
-        chat_id: chatId,
-        message_id: messageId,
-        parse_mode: "Markdown",
-        reply_markup: { inline_keyboard: buttons }
-      });
-    }
-
-    if (data === 'back_to_home') {
-      await handleStart(bot, chatId, from, query.id, messageId);
-    }
   });
 };
 
