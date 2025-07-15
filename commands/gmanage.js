@@ -1,11 +1,10 @@
-module.exports = (bot) => {
-  const ADMIN_UID = '7933110913'; // তোমার UID
-  const ADMIN_USERNAME = 'rx_rihad'; // '@' ছাড়া username
+const { ADMIN_UID, ADMIN_USERNAME } = require('../config/botConfig'); // ✅ From config file
 
+module.exports = (bot) => {
   // 🔒 Lock command
   bot.onText(/^\/lock$/, async (msg) => {
     const chatId = msg.chat.id;
-    const userId = msg.from.id;
+    const userId = msg.from.id.toString();
     const username = msg.from.username || '';
 
     if (msg.chat.type === 'private') {
@@ -14,7 +13,7 @@ module.exports = (bot) => {
 
     // ✅ Admin check
     if (
-      userId.toString() !== ADMIN_UID.toString() &&
+      userId !== ADMIN_UID &&
       username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()
     ) {
       return bot.sendMessage(chatId, "⛔ শুধুমাত্র অ্যাডমিনরা এই কমান্ড চালাতে পারে।");
@@ -45,7 +44,7 @@ module.exports = (bot) => {
   // 🔓 Unlock command
   bot.onText(/^\/unlock$/, async (msg) => {
     const chatId = msg.chat.id;
-    const userId = msg.from.id;
+    const userId = msg.from.id.toString();
     const username = msg.from.username || '';
 
     if (msg.chat.type === 'private') {
@@ -54,7 +53,7 @@ module.exports = (bot) => {
 
     // ✅ Admin check
     if (
-      userId.toString() !== ADMIN_UID.toString() &&
+      userId !== ADMIN_UID &&
       username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()
     ) {
       return bot.sendMessage(chatId, "⛔ শুধুমাত্র অ্যাডমিনরা এই কমান্ড চালাতে পারে।");
