@@ -1,19 +1,23 @@
+const { ADMIN_UID, ADMIN_USERNAME } = require('../config/botConfig');
+
 module.exports = (bot) => {
   // 🔒 Lock command
   bot.onText(/^\/lock$/, async (msg) => {
     const chatId = msg.chat.id;
     const userId = msg.from.id;
+    const username = msg.from.username || "";
 
     if (msg.chat.type === 'private') {
       return bot.sendMessage(chatId, "❌ এই কমান্ড শুধু গ্রুপে কাজ করে।");
     }
 
-    try {
-      const member = await bot.getChatMember(chatId, userId);
-      if (member.status !== 'administrator' && member.status !== 'creator') {
-        return bot.sendMessage(chatId, "⛔ শুধুমাত্র অ্যাডমিনরা এই কমান্ড চালাতে পারে।");
-      }
+    // ✅ Admin check with UID or username
+    if (userId.toString() !== ADMIN_UID.toString() &&
+        username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()) {
+      return bot.sendMessage(chatId, "⛔ শুধুমাত্র অ্যাডমিনরা এই কমান্ড চালাতে পারে।");
+    }
 
+    try {
       await bot.setChatPermissions(chatId, {
         can_send_messages: false,
         can_send_media_messages: false,
@@ -39,17 +43,18 @@ module.exports = (bot) => {
   bot.onText(/^\/unlock$/, async (msg) => {
     const chatId = msg.chat.id;
     const userId = msg.from.id;
+    const username = msg.from.username || "";
 
     if (msg.chat.type === 'private') {
       return bot.sendMessage(chatId, "❌ এই কমান্ড শুধু গ্রুপে কাজ করে।");
     }
 
-    try {
-      const member = await bot.getChatMember(chatId, userId);
-      if (member.status !== 'administrator' && member.status !== 'creator') {
-        return bot.sendMessage(chatId, "⛔ শুধুমাত্র অ্যাডমিনরা এই কমান্ড চালাতে পারে।");
-      }
+    if (userId.toString() !== ADMIN_UID.toString() &&
+        username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()) {
+      return bot.sendMessage(chatId, "⛔ শুধুমাত্র অ্যাডমিনরা এই কমান্ড চালাতে পারে।");
+    }
 
+    try {
       await bot.setChatPermissions(chatId, {
         can_send_messages: true,
         can_send_media_messages: true,
@@ -58,7 +63,7 @@ module.exports = (bot) => {
         can_add_web_page_previews: true,
         can_invite_users: true,
         can_pin_messages: true,
-        can_change_info: false // Info change allow না দিলেও হবে
+        can_change_info: false
       });
 
       return bot.sendMessage(chatId, "🔓 গ্রুপ এখন *আনলকড* করা হয়েছে।", {
