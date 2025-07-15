@@ -99,6 +99,22 @@ module.exports = (bot) => {
             }
           });
 
+        case 'uptime':
+          const uptime = Math.floor((Date.now() - global.botStartTime) / 1000);
+          const hours = Math.floor(uptime / 3600);
+          const minutes = Math.floor((uptime % 3600) / 60);
+          const seconds = uptime % 60;
+
+          const uptimeText = `🕒 *Bot Uptime:*\n${hours}h ${minutes}m ${seconds}s`;
+          return bot.editMessageText(uptimeText, {
+            chat_id: chatId,
+            message_id: messageId,
+            parse_mode: 'Markdown',
+            reply_markup: {
+              inline_keyboard: [[{ text: '⬅️ Back', callback_data: 'menu' }]]
+            }
+          });
+
         case 'users':
           if (!isAdmin) {
             return bot.answerCallbackQuery(query.id, {
