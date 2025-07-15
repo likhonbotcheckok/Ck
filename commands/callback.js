@@ -9,12 +9,10 @@ module.exports = (bot) => {
     const userId = query.from.id;
     const username = query.from.username || "NoUsername";
     const cleanUsername = username.replace(/[_*[\]()~`>#+=|{}.!-]/g, '\\$&');
-
     const chatId = query.message?.chat?.id;
     const messageId = query.message?.message_id;
 
     if (!chatId || !messageId) {
-      console.error("❌ Missing chatId or messageId in callback_query");
       return bot.answerCallbackQuery(query.id, {
         text: "⚠️ Message not found.",
         show_alert: true
@@ -100,10 +98,10 @@ module.exports = (bot) => {
           });
 
         case 'uptime':
-          const uptime = Math.floor((Date.now() - global.botStartTime) / 1000);
-          const hours = Math.floor(uptime / 3600);
-          const minutes = Math.floor((uptime % 3600) / 60);
-          const seconds = uptime % 60;
+          const uptimeSec = Math.floor((Date.now() - global.botStartTime) / 1000);
+          const hours = Math.floor(uptimeSec / 3600);
+          const minutes = Math.floor((uptimeSec % 3600) / 60);
+          const seconds = uptimeSec % 60;
 
           const uptimeText = `🕒 *Bot Uptime:*\n${hours}h ${minutes}m ${seconds}s`;
           return bot.editMessageText(uptimeText, {
