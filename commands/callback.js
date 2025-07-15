@@ -10,7 +10,6 @@ module.exports = (bot) => {
     const username = query.from.username || "NoUsername";
     const cleanUsername = username.replace(/[_*[\]()~`>#+=|{}.!-]/g, '\\$&');
 
-    // ✅ fallback to avoid undefined errors
     const chatId = query.message?.chat?.id;
     const messageId = query.message?.message_id;
 
@@ -34,7 +33,6 @@ module.exports = (bot) => {
 
     try {
       switch (data) {
-
         case 'menu':
           await bot.answerCallbackQuery(query.id);
           const menuButtons = isAdmin
@@ -92,7 +90,7 @@ module.exports = (bot) => {
 
         case '2fa':
           await setUserMode(userId, '2fa');
-          return bot.editMessageText(`🔐 You are now in *2FA Mode*\n\nUse .2fa <secret_key>\nExample:\n.2fa JBSWY3DPEHPK3PXP`, {
+          return bot.editMessageText(`🔐 You are now in *2FA Mode*\n\n*Now send your secret key only.*\nExample:\n\`JBSWY3DPEHPK3PXP\``, {
             chat_id: chatId,
             message_id: messageId,
             parse_mode: 'Markdown',
