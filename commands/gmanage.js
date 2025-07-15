@@ -1,25 +1,25 @@
-const { ADMIN_UID, ADMIN_USERNAME } = require('../config/botConfig'); // ✅ From config file
+const { ADMIN_UID, ADMIN_USERNAME } = require('../config/botConfig');
 
 module.exports = (bot) => {
   // 🔒 Lock command
   bot.onText(/^\/lock$/, async (msg) => {
     const chatId = msg.chat.id;
     const userId = msg.from.id.toString();
-    const username = msg.from.username || '';
+    const username = (msg.from.username || '').toLowerCase();
 
     if (msg.chat.type === 'private') {
       return bot.sendMessage(chatId, "❌ এই কমান্ড শুধু গ্রুপে কাজ করে।");
     }
 
-    // ✅ Admin check
-    if (
-      userId !== ADMIN_UID &&
-      username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()
-    ) {
-      return bot.sendMessage(chatId, "⛔ শুধুমাত্র অ্যাডমিনরা এই কমান্ড চালাতে পারে।");
-    }
-
     try {
+      const member = await bot.getChatMember(chatId, userId);
+      const isTelegramAdmin = member.status === 'administrator' || member.status === 'creator';
+      const isBotAdmin = userId === ADMIN_UID || username === ADMIN_USERNAME.toLowerCase();
+
+      if (!isTelegramAdmin && !isBotAdmin) {
+        return bot.sendMessage(chatId, "⛔ শুধুমাত্র অ্যাডমিনরা এই কমান্ড চালাতে পারে।");
+      }
+
       await bot.setChatPermissions(chatId, {
         can_send_messages: false,
         can_send_media_messages: false,
@@ -45,21 +45,21 @@ module.exports = (bot) => {
   bot.onText(/^\/unlock$/, async (msg) => {
     const chatId = msg.chat.id;
     const userId = msg.from.id.toString();
-    const username = msg.from.username || '';
+    const username = (msg.from.username || '').toLowerCase();
 
     if (msg.chat.type === 'private') {
       return bot.sendMessage(chatId, "❌ এই কমান্ড শুধু গ্রুপে কাজ করে।");
     }
 
-    // ✅ Admin check
-    if (
-      userId !== ADMIN_UID &&
-      username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()
-    ) {
-      return bot.sendMessage(chatId, "⛔ শুধুমাত্র অ্যাডমিনরা এই কমান্ড চালাতে পারে।");
-    }
-
     try {
+      const member = await bot.getChatMember(chatId, userId);
+      const isTelegramAdmin = member.status === 'administrator' || member.status === 'creator';
+      const isBotAdmin = userId === ADMIN_UID || username === ADMIN_USERNAME.toLowerCase();
+
+      if (!isTelegramAdmin && !isBotAdmin) {
+        return bot.sendMessage(chatId, "⛔ শুধুমাত্র অ্যাডমিনরা এই কমান্ড চালাতে পারে।");
+      }
+
       await bot.setChatPermissions(chatId, {
         can_send_messages: true,
         can_send_media_messages: true,
