@@ -30,9 +30,11 @@ module.exports = (bot) => {
     const isBanned = db.banned.includes(userId);
 
     try {
+      // ✅ always acknowledge the button press
+      await bot.answerCallbackQuery(query.id);
+
       switch (data) {
         case 'menu':
-          await bot.answerCallbackQuery(query.id);
           const menuButtons = isAdmin
             ? [
                 [{ text: "🧾 Users", callback_data: "users" }],
@@ -115,10 +117,7 @@ module.exports = (bot) => {
 
         case 'users':
           if (!isAdmin) {
-            return bot.answerCallbackQuery(query.id, {
-              text: "⛔ Admin access only",
-              show_alert: true
-            });
+            return bot.sendMessage(chatId, '⛔ Admin access only.');
           }
           const format = (arr) => arr.length ? arr.map(id => `\`${id}\``).join(', ') : '_None_';
           const usersText =
@@ -169,6 +168,7 @@ Welcome back to *PremiumBot*.`, {
           });
 
         default:
+          console.warn("❗ Unknown callback data received:", data);
           return bot.answerCallbackQuery(query.id, {
             text: "❗ Unknown button clicked.",
             show_alert: true
