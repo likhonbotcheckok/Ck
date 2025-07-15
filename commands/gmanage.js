@@ -1,19 +1,22 @@
-const { ADMIN_UID, ADMIN_USERNAME } = require('../config/botConfig');
-
 module.exports = (bot) => {
+  const ADMIN_UID = '7933110913'; // তোমার UID
+  const ADMIN_USERNAME = 'rx_rihad'; // '@' ছাড়া username
+
   // 🔒 Lock command
   bot.onText(/^\/lock$/, async (msg) => {
     const chatId = msg.chat.id;
     const userId = msg.from.id;
-    const username = msg.from.username || "";
+    const username = msg.from.username || '';
 
     if (msg.chat.type === 'private') {
       return bot.sendMessage(chatId, "❌ এই কমান্ড শুধু গ্রুপে কাজ করে।");
     }
 
-    // ✅ Admin check with UID or username
-    if (userId.toString() !== ADMIN_UID.toString() &&
-        username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()) {
+    // ✅ Admin check
+    if (
+      userId.toString() !== ADMIN_UID.toString() &&
+      username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()
+    ) {
       return bot.sendMessage(chatId, "⛔ শুধুমাত্র অ্যাডমিনরা এই কমান্ড চালাতে পারে।");
     }
 
@@ -43,14 +46,17 @@ module.exports = (bot) => {
   bot.onText(/^\/unlock$/, async (msg) => {
     const chatId = msg.chat.id;
     const userId = msg.from.id;
-    const username = msg.from.username || "";
+    const username = msg.from.username || '';
 
     if (msg.chat.type === 'private') {
       return bot.sendMessage(chatId, "❌ এই কমান্ড শুধু গ্রুপে কাজ করে।");
     }
 
-    if (userId.toString() !== ADMIN_UID.toString() &&
-        username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()) {
+    // ✅ Admin check
+    if (
+      userId.toString() !== ADMIN_UID.toString() &&
+      username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()
+    ) {
       return bot.sendMessage(chatId, "⛔ শুধুমাত্র অ্যাডমিনরা এই কমান্ড চালাতে পারে।");
     }
 
