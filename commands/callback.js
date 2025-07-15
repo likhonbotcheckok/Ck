@@ -5,12 +5,22 @@ const notifyAdmin = require('../utils/notifyAdmin');
 
 module.exports = (bot) => {
   bot.on('callback_query', async (query) => {
-    const chatId = query.message.chat.id;
-    const messageId = query.message.message_id;
     const data = query.data;
     const userId = query.from.id;
     const username = query.from.username || "NoUsername";
     const cleanUsername = username.replace(/[_*[\]()~`>#+=|{}.!-]/g, '\\$&');
+
+    // ✅ fallback to avoid undefined errors
+    const chatId = query.message?.chat?.id;
+    const messageId = query.message?.message_id;
+
+    if (!chatId || !messageId) {
+      console.error("❌ Missing chatId or messageId in callback_query");
+      return bot.answerCallbackQuery(query.id, {
+        text: "⚠️ Message not found.",
+        show_alert: true
+      });
+    }
 
     const db = await loadDB();
 
@@ -18,12 +28,13 @@ module.exports = (bot) => {
       username?.toLowerCase() === ADMIN_USERNAME?.toLowerCase() ||
       userId.toString() === ADMIN_UID.toString()
     );
-    const isApproved = db.approved.map(id => id.toString()).includes(userId.toString());
+    const isApproved = db.approved.includes(userId);
     const isPending = db.pending.includes(userId);
     const isBanned = db.banned.includes(userId);
 
     try {
       switch (data) {
+
         case 'menu':
           await bot.answerCallbackQuery(query.id);
           const menuButtons = isAdmin
@@ -134,7 +145,6 @@ Welcome back to *PremiumBot*.`, {
               }
             });
           }
-          // fallback: unauthorized
           if (!isPending) {
             db.pending.push(userId);
             await saveDB(db);
@@ -152,9 +162,10 @@ Welcome back to *PremiumBot*.`, {
             show_alert: true
           });
       }
+
     } catch (err) {
       console.error("❌ Callback error:", err);
-      bot.sendMessage(chatId, '❌ An error occurred while processing your request.');
+      return bot.sendMessage(chatId, '❌ An error occurred while processing your request.');
     }
   });
 };
