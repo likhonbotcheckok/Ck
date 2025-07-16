@@ -18,8 +18,7 @@ async function handleStart(bot, chatId, from, callbackId = null, messageId = nul
   const cleanUsername = escape(username);
   const isAdmin = uid.toString() === ADMIN_UID.toString();
 
-  let db = await loadDB();
-
+  const db = await loadDB();
   const isApproved = db.approved.includes(uid);
   const isBanned = db.banned.includes(uid);
   const isPending = db.pending.includes(uid);
@@ -30,8 +29,7 @@ async function handleStart(bot, chatId, from, callbackId = null, messageId = nul
 
   if (isAdmin || isApproved) {
     const status = isAdmin ? 'VIP' : 'Trial';
-
-    const message =
+    const msg =
 `╭━━❖【 *𝐖𝐄𝐋𝐂𝐎𝐌𝐄 𝐓𝐎 𝐗𝟐𝟎 𝐁𝐎𝐓* 】❖━━╮
 👤 𝐇𝐞𝐥𝐥𝐨\\! *${cleanUsername}*
 
@@ -51,22 +49,20 @@ async function handleStart(bot, chatId, from, callbackId = null, messageId = nul
       [{ text: "👥 Group", url: "https://t.me/likhon_premium" }]
     ];
 
+    const opts = {
+      parse_mode: 'MarkdownV2',
+      reply_markup: { inline_keyboard: buttons }
+    };
+
     if (callbackId && messageId) {
       await bot.answerCallbackQuery(callbackId);
-      return bot.editMessageText(message, {
-        chat_id: chatId,
-        message_id: messageId,
-        parse_mode: 'MarkdownV2',
-        reply_markup: { inline_keyboard: buttons }
-      });
+      return bot.editMessageText(msg, { chat_id: chatId, message_id: messageId, ...opts });
     } else {
-      return bot.sendMessage(chatId, message, {
-        parse_mode: 'MarkdownV2',
-        reply_markup: { inline_keyboard: buttons }
-      });
+      return bot.sendMessage(chatId, msg, opts);
     }
   }
 
+  // 🔒 Restricted user
   const restrictedMsg = 
 `🚫 *Access Restricted*
 
