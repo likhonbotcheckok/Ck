@@ -1,6 +1,6 @@
 require('dotenv').config();
 
 module.exports = {
-  ADMIN_UID: parseInt(process.env.ADMIN_UID),      // তোমার Telegram UID
-  ADMIN_USERNAME: process.env.ADMIN_USERNAME       // তোমার Telegram username (without @)
+  ADMIN_UID: process.env.ADMIN_UID,              // Telegram UID (string)
+  ADMIN_USERNAME: process.env.ADMIN_USERNAME     // Username (without @)
 };
