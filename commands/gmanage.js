@@ -1,21 +1,28 @@
-const { ADMIN_UID, ADMIN_USERNAME } = require('../config/botConfig');
-
 module.exports = (bot) => {
-  // 🔒 Lock command
+  const { ADMIN_UID, ADMIN_USERNAME } = require('../config/botConfig');
+
+  async function isAdmin(bot, chatId, userId) {
+    try {
+      const member = await bot.getChatMember(chatId, userId);
+      return ['administrator', 'creator'].includes(member.status);
+    } catch (err) {
+      console.error("🔴 Admin check error:", err);
+      return false;
+    }
+  }
+
+  // 🔒 Lock
   bot.onText(/^\/lock$/, async (msg) => {
     const chatId = msg.chat.id;
-    const userId = msg.from.id.toString();
-    const username = msg.from.username || '';
+    const userId = msg.from.id;
 
     if (!['group', 'supergroup'].includes(msg.chat.type)) {
-      return bot.sendMessage(chatId, "❌ This command only works in group chats.");
+      return bot.sendMessage(chatId, "❌ এই কমান্ড শুধু গ্রুপে কাজ করে।");
     }
 
-    if (
-      userId !== ADMIN_UID &&
-      username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()
-    ) {
-      return bot.sendMessage(chatId, "⛔ Only admins can use this command.");
+    const adminCheck = await isAdmin(bot, chatId, userId);
+    if (!adminCheck) {
+      return bot.sendMessage(chatId, "⛔ শুধুমাত্র অ্যাডমিনরা এই কমান্ড চালাতে পারে।");
     }
 
     try {
@@ -29,32 +36,27 @@ module.exports = (bot) => {
         can_pin_messages: false,
         can_change_info: false
       });
-
-      return bot.sendMessage(chatId, "🔒 The group has been *locked*.", {
+      return bot.sendMessage(chatId, "🔒 গ্রুপ এখন *লকড* করা হয়েছে।", {
         parse_mode: "Markdown"
       });
-
     } catch (err) {
-      console.error("❌ Lock command error:", err);
-      return bot.sendMessage(chatId, "⚠️ An error occurred while locking the group.");
+      console.error("❌ Lock error:", err);
+      return bot.sendMessage(chatId, "⚠️ লক করতে সমস্যা হয়েছে।");
     }
   });
 
-  // 🔓 Unlock command
+  // 🔓 Unlock
   bot.onText(/^\/unlock$/, async (msg) => {
     const chatId = msg.chat.id;
-    const userId = msg.from.id.toString();
-    const username = msg.from.username || '';
+    const userId = msg.from.id;
 
     if (!['group', 'supergroup'].includes(msg.chat.type)) {
-      return bot.sendMessage(chatId, "❌ This command only works in group chats.");
+      return bot.sendMessage(chatId, "❌ এই কমান্ড শুধু গ্রুপে কাজ করে।");
     }
 
-    if (
-      userId !== ADMIN_UID &&
-      username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()
-    ) {
-      return bot.sendMessage(chatId, "⛔ Only admins can use this command.");
+    const adminCheck = await isAdmin(bot, chatId, userId);
+    if (!adminCheck) {
+      return bot.sendMessage(chatId, "⛔ শুধুমাত্র অ্যাডমিনরা এই কমান্ড চালাতে পারে।");
     }
 
     try {
@@ -68,14 +70,12 @@ module.exports = (bot) => {
         can_pin_messages: true,
         can_change_info: false
       });
-
-      return bot.sendMessage(chatId, "🔓 The group has been *unlocked*.", {
+      return bot.sendMessage(chatId, "🔓 গ্রুপ এখন *আনলকড* করা হয়েছে।", {
         parse_mode: "Markdown"
       });
-
     } catch (err) {
-      console.error("❌ Unlock command error:", err);
-      return bot.sendMessage(chatId, "⚠️ An error occurred while unlocking the group.");
+      console.error("❌ Unlock error:", err);
+      return bot.sendMessage(chatId, "⚠️ আনলক করতে সমস্যা হয়েছে।");
     }
   });
 };
