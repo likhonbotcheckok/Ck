@@ -10,16 +10,9 @@ module.exports = (bot) => {
     );
   };
 
-  const getTargetChatId = (msg) => {
-    // For discussion group threads
-    return msg.is_topic_message ? msg.message_thread_id : msg.chat.id;
-  };
-
-  // 🔒 Lock Command
+  // 🔒 LOCK COMMAND
   bot.onText(/^\/lock$/, async (msg) => {
     const chatId = msg.chat.id;
-    const replyChatId = getTargetChatId(msg);
-
     if (!['group', 'supergroup'].includes(msg.chat.type)) {
       return bot.sendMessage(chatId, "❌ এই কমান্ড শুধু গ্রুপে কাজ করে।");
     }
@@ -40,20 +33,19 @@ module.exports = (bot) => {
         can_change_info: false,
       });
 
-      return bot.sendMessage(replyChatId, "🔒 গ্রুপ এখন *লকড* করা হয়েছে।", {
+      return bot.sendMessage(chatId, "🔒 পুরো গ্রুপ লকড হয়েছে ✅", {
         parse_mode: "Markdown",
+        message_thread_id: msg.is_topic_message ? msg.message_thread_id : undefined,
       });
     } catch (err) {
-      console.error("❌ Lock command error:", err);
-      return bot.sendMessage(replyChatId, "⚠️ কিছু ভুল হয়েছে লক করতে গিয়ে।");
+      console.error("Lock command error:", err);
+      return bot.sendMessage(chatId, "⚠️ কিছু ভুল হয়েছে লক করতে গিয়ে।");
     }
   });
 
-  // 🔓 Unlock Command
+  // 🔓 UNLOCK COMMAND
   bot.onText(/^\/unlock$/, async (msg) => {
     const chatId = msg.chat.id;
-    const replyChatId = getTargetChatId(msg);
-
     if (!['group', 'supergroup'].includes(msg.chat.type)) {
       return bot.sendMessage(chatId, "❌ এই কমান্ড শুধু গ্রুপে কাজ করে।");
     }
@@ -74,12 +66,13 @@ module.exports = (bot) => {
         can_change_info: false,
       });
 
-      return bot.sendMessage(replyChatId, "🔓 গ্রুপ এখন *আনলকড* করা হয়েছে।", {
+      return bot.sendMessage(chatId, "🔓 গ্রুপ আনলকড ✅", {
         parse_mode: "Markdown",
+        message_thread_id: msg.is_topic_message ? msg.message_thread_id : undefined,
       });
     } catch (err) {
-      console.error("❌ Unlock command error:", err);
-      return bot.sendMessage(replyChatId, "⚠️ কিছু ভুল হয়েছে আনলক করতে গিয়ে।");
+      console.error("Unlock command error:", err);
+      return bot.sendMessage(chatId, "⚠️ কিছু ভুল হয়েছে আনলক করতে গিয়ে।");
     }
   });
 };
