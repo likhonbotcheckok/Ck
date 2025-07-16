@@ -26,10 +26,21 @@ async function handleStart(bot, chatId, from, callbackId = null, messageId = nul
   }
 
   if (isAdmin || isApproved) {
-    const message = `👋 *Hello, ${cleanUsername}!*  
-Welcome to *PremiumBot*.
+    const status = isAdmin || isApproved ? 'VIP' : 'Trial';
+    const message = 
+`╭━━❖【 *𝐖𝐄𝐋𝐂𝐎𝐌𝐄 𝐓𝐎 𝐗𝟐𝟎 𝐁𝐎𝐓* 】❖━━╮
+👤 𝐇𝐞𝐥𝐥𝐨\\! *${cleanUsername}*
 
-Tap any option below to continue.`;
+🐶🌟 𝐔𝐬𝐞 𝐎𝐮𝐫 𝐏𝐫𝐞𝐦𝐢𝐮𝐦 𝐐𝐮𝐚𝐥𝐢𝐭𝐲 𝐒𝐞𝐫𝐯𝐢𝐜𝐞  
+🟢💠 *𝐒𝐭𝐚𝐭𝐮𝐬* : [ *${status}* ]
+
+❇️🔋 𝐀𝐜𝐭𝐢𝐯𝐞 : 24/7 𝐇𝐨𝐮𝐫𝐬 𝐎𝐧 𝐕𝐏𝐒  
+⚡⚜️ 𝐄𝐱𝐩𝐞𝐫𝐢𝐞𝐧𝐜𝐞 𝐁𝐞𝐭𝐭𝐞𝐫 𝐐𝐮𝐚𝐥𝐢𝐭𝐲
+
+🚀📌 *𝐍𝐨𝐭𝐢𝐜𝐞* : 𝐆𝐞𝐭 𝐕𝐈𝐏 𝐔𝐬𝐞 𝐒𝐦𝐨𝐨𝐭𝐡𝐥𝐲  
+⚠️☎️ *𝐂𝐨𝐧𝐭𝐚𝐜𝐭* : @${ADMIN_USERNAME}
+
+╰━━━━━⊰✨⟦ *𝐑 𝐈 𝐇 𝐀 𝐃* ⟧✨⊱━━━━━━╯`;
 
     const buttons = [
       [{ text: "📋 Menu", callback_data: "menu" }],
@@ -41,12 +52,12 @@ Tap any option below to continue.`;
       return bot.editMessageText(message, {
         chat_id: chatId,
         message_id: messageId,
-        parse_mode: 'Markdown',
+        parse_mode: 'MarkdownV2',
         reply_markup: { inline_keyboard: buttons }
       });
     } else {
       return bot.sendMessage(chatId, message, {
-        parse_mode: 'Markdown',
+        parse_mode: 'MarkdownV2',
         reply_markup: { inline_keyboard: buttons }
       });
     }
