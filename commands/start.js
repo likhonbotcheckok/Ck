@@ -13,10 +13,10 @@ module.exports = (bot) => {
 };
 
 async function handleStart(bot, chatId, from, callbackId = null, messageId = null) {
-  const isAdmin = String(uid) === String(ADMIN_UID);
+  const uid = from.id; // ✅ uid declare
   const username = from.username || 'NoUsername';
-  const cleanUsername = username.replace(/[_*[\]()~`>#+=|{}.!-]/g, '\\$&'); // MarkdownV2 escaping
-  const isAdmin = uid === Number(ADMIN_UID);
+  const cleanUsername = username.replace(/[_*[\]()~`>#+=|{}.!-]/g, '\\$&'); // ✅ Escape MarkdownV2
+  const isAdmin = String(uid) === String(ADMIN_UID); // ✅ Single isAdmin declare
 
   let userDB = await loadDB();
 
@@ -72,7 +72,7 @@ async function handleStart(bot, chatId, from, callbackId = null, messageId = nul
     }
   }
 
-  // Not approved yet
+  // ⛔ Not approved yet
   const restrictedMsg = `
 🚫 *Access Restricted*
 
