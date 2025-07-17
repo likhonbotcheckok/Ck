@@ -31,15 +31,19 @@ async function handleStart(bot, chatId, from, callbackId = null, messageId = nul
     const message = `
 ╭━━❖【 *𝐖𝐄𝐋𝐂𝐎𝐌𝐄 𝐓𝐎 𝐗𝟐𝟎 𝐁𝐎𝐓* 】❖━━╮
 
-👤 𝐇𝐞𝐥𝐥𝐨 \\! *${cleanUsername}* 🐶🌟  
-𝐔𝐬𝐞 𝐎𝐮𝐫 𝐏𝐫𝐞𝐦𝐢𝐮𝐦 𝐐𝐮𝐚𝐥𝐢𝐭𝐲 𝐒𝐞𝐫𝐯𝐢𝐜𝐞
+👤 𝐇𝐞𝐥𝐥𝐨 \\! *${cleanUsername}* 🐶
 
-🟢💠 *Status* : [ ${status} ]  
-❇️🔋 *Active* : 24/7 Hours On VPS  
-⚡⚜️ *Experience Our Better Quality*
+🌟 𝐔𝐬𝐞 𝐎𝐮𝐫 𝐏𝐫𝐞𝐦𝐢𝐮𝐦 𝐐𝐮𝐚𝐥𝐢𝐭𝐲 𝐒𝐞𝐫𝐯𝐢𝐜𝐞
 
-🚀📌 *Notice* : Get VIP \\& Use Smoothly  
-⚠️☎️ *Contact* : @YourAdmin
+💠 *Status* : [ ${status} ] 🟢
+
+🔋 *Active* : 24/7 Hours On VPS ❇️
+
+⚜️ *Experience Our Better Quality* ⚡
+
+📌 *Notice* : Get VIP \\& Use Smoothly ⚠️
+
+☎️ *Contact* : @YourAdmin
 
 ╰━━━━━⊰✨⟦ 𝐑 𝐈 𝐇 𝐀 𝐃 ⟧✨⊱━━━━━━╯
     `.trim();
