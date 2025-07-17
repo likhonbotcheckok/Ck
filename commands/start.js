@@ -13,16 +13,26 @@ module.exports = (bot) => {
 };
 
 async function handleStart(bot, chatId, from, callbackId = null, messageId = null) {
-  const uid = from.id; // ✅ uid declare
+  const uid = String(from.id); // ✅ Always use string for UID
   const username = from.username || 'NoUsername';
-  const cleanUsername = username.replace(/[_*[\]()~`>#+=|{}.!-]/g, '\\$&'); // ✅ Escape MarkdownV2
-  const isAdmin = String(uid) === String(ADMIN_UID); // ✅ Single isAdmin declare
+  const cleanUsername = username.replace(/[_*[\]()~`>#+=|{}.!-]/g, '\\$&');
+
+  const isAdmin = uid === String(ADMIN_UID);
 
   let userDB = await loadDB();
 
   const isApproved = userDB.approved.includes(uid);
   const isBanned = userDB.banned.includes(uid);
   const isPending = userDB.pending.includes(uid);
+
+  // Debug log (optional)
+  console.log({
+    uid,
+    isAdmin,
+    isApproved,
+    isBanned,
+    approvedDB: userDB.approved,
+  });
 
   if (isBanned) {
     return bot.sendMessage(chatId, '🚫 You are banned from using this bot.');
