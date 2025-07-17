@@ -34,7 +34,7 @@ async function handleStart(bot, chatId, from, callbackId = null, messageId = nul
 
 🌟 𝐔𝐬𝐞 𝐎𝐮𝐫 𝐏𝐫𝐞𝐦𝐢𝐮𝐦 𝐐𝐮𝐚𝐥𝐢𝐭𝐲 𝐒𝐞𝐫𝐯𝐢𝐜𝐞
 
-💠 *Status* : \${status} \ 🟢
+💠 *Status* : \\[ ${status} \\] 🟢
 
 🔋 *Active* : 24\\/7 Hours On VPS ❇️
 
@@ -42,7 +42,7 @@ async function handleStart(bot, chatId, from, callbackId = null, messageId = nul
 
 📌 *Notice* : Get VIP \\& Use Smoothly ⚠️
 
-☎️ *Contact* : @YourAdmin
+☎️ *Contact* : \\@YourAdmin
 
 ╰━━━━━⊰✨⟦ 𝐑 𝐈 𝐇 𝐀 𝐃 ⟧✨⊱━━━━━━╯
     `.trim();
@@ -68,6 +68,7 @@ async function handleStart(bot, chatId, from, callbackId = null, messageId = nul
     }
   }
 
+  // If not approved
   const restrictedMsg = `
 🚫 *Access Restricted*
 
@@ -76,10 +77,10 @@ Thanks for your interest in *PremiumBot*\\.
 🔐 *Access is limited to authorized users only\\.*
 
 📮 *To request access:*  
-Message [@${ADMIN_USERNAME}](https://t.me/${ADMIN_USERNAME}) with your Telegram details.
+Message [\\@${ADMIN_USERNAME}](https://t.me/${ADMIN_USERNAME}) with your Telegram details\\.
 
 🆔 *Your Telegram ID:* \`${uid}\`  
-🔗 *Username:* @${username}
+🔗 *Username:* \\@${cleanUsername}
 
 🙏 We appreciate your patience\\.
   `.trim();
