@@ -13,7 +13,7 @@ module.exports = (bot) => {
 };
 
 async function handleStart(bot, chatId, from, callbackId = null, messageId = null) {
-  const uid = from.id;
+  const isAdmin = String(uid) === String(ADMIN_UID);
   const username = from.username || 'NoUsername';
   const cleanUsername = username.replace(/[_*[\]()~`>#+=|{}.!-]/g, '\\$&'); // MarkdownV2 escaping
   const isAdmin = uid === Number(ADMIN_UID);
