@@ -4,7 +4,11 @@ const notifyAdmin = require('../utils/notifyAdmin');
 
 module.exports = (bot) => {
   bot.onText(/\/start/, async (msg) => {
-    await handleStart(bot, msg.chat.id, msg.from);
+    try {
+      await handleStart(bot, msg.chat.id, msg.from);
+    } catch (err) {
+      console.error('/start command error:', err.message);
+    }
   });
 };
 
@@ -16,9 +20,9 @@ async function handleStart(bot, chatId, from, callbackId = null, messageId = nul
 
   let userDB = await loadDB();
 
-  const isApproved = userDB.approved.some(id => String(id) === String(uid));
-  const isBanned = userDB.banned.some(id => String(id) === String(uid));
-  const isPending = userDB.pending.some(id => String(id) === String(uid));
+  const isApproved = userDB.approved.includes(uid);
+  const isBanned = userDB.banned.includes(uid);
+  const isPending = userDB.pending.includes(uid);
 
   if (isBanned) {
     return bot.sendMessage(chatId, '🚫 You are banned from using this bot.');
@@ -45,11 +49,11 @@ async function handleStart(bot, chatId, from, callbackId = null, messageId = nul
 ☎️ *Contact* : \\@YourAdmin
 
 ╰━━━━━⊰✨⟦ 𝐑 𝐈 𝐇 𝐀 𝐃 ⟧✨⊱━━━━━━╯
-    `.trim();
+`.trim();
 
     const buttons = [
-      [{ text: "📋 Menu", callback_data: "menu" }],
-      [{ text: "👥 Group", url: "https://t.me/likhon_premium" }]
+      [{ text: '📋 Menu', callback_data: 'menu' }],
+      [{ text: '👥 Group', url: 'https://t.me/likhon_premium' }],
     ];
 
     if (callbackId && messageId) {
@@ -58,17 +62,17 @@ async function handleStart(bot, chatId, from, callbackId = null, messageId = nul
         chat_id: chatId,
         message_id: messageId,
         parse_mode: 'MarkdownV2',
-        reply_markup: { inline_keyboard: buttons }
+        reply_markup: { inline_keyboard: buttons },
       });
     } else {
       return bot.sendMessage(chatId, message, {
         parse_mode: 'MarkdownV2',
-        reply_markup: { inline_keyboard: buttons }
+        reply_markup: { inline_keyboard: buttons },
       });
     }
   }
 
-  // If not approved
+  // Not approved yet
   const restrictedMsg = `
 🚫 *Access Restricted*
 
@@ -83,9 +87,11 @@ Message [\\@${ADMIN_USERNAME}](https://t.me/${ADMIN_USERNAME}) with your Telegra
 🔗 *Username:* \\@${cleanUsername}
 
 🙏 We appreciate your patience\\.
-  `.trim();
+`.trim();
 
-  await bot.sendMessage(chatId, restrictedMsg, { parse_mode: 'MarkdownV2' });
+  await bot.sendMessage(chatId, restrictedMsg, {
+    parse_mode: 'MarkdownV2',
+  });
 
   if (!isPending) {
     userDB.pending.push(uid);
