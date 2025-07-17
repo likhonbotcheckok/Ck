@@ -38,7 +38,7 @@ async function handleStart(bot, chatId, from, callbackId = null, messageId = nul
 
 🌟 𝐔𝐬𝐞 𝐎𝐮𝐫 𝐏𝐫𝐞𝐦𝐢𝐮𝐦 𝐐𝐮𝐚𝐥𝐢𝐭𝐲 𝐒𝐞𝐫𝐯𝐢𝐜𝐞
 
-💠 *Status* : \\[ ${status} \\] 🟢
+💠 *Status* : \\[${status}\\] 🟢
 
 🔋 *Active* : 24\\/7 Hours On VPS ❇️
 
